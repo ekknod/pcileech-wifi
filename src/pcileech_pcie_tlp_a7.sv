@@ -206,7 +206,7 @@ module pcileech_pcie_tlptapcfgspace(
                         
 
                         //
-                        // 0x2000 == EEPROM MAGIC                     (0x00EC0000)
+                        // 0x2000 == EEPROM MAGIC                     (0x0000A55A)
                         // 0x2200 == EEPROM_SIZE                      (0x00000004)
                         // 0x2204 == EEPROM_CHECKSUM                  (0x0000FFFB)
                         // 0x2208 == EEPROM version + revision        (0x0000E00E)
