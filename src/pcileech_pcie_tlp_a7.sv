@@ -276,7 +276,7 @@ module pcileech_pcie_tlptapcfgspace(
                                 end_of_day_data <= 32'hEFBEADDE;
                             end
 
-                        else if (snoop_addr_dw16[15:0] == 16'h0884) // 0x2210, EEPROM_REGDOMAIN, else if (snoop_addr_dw16[15:0] > 16'h0888 & snoop_addr_dw16[15:0] < 16'h0A00) // 0x2800, StupidNigger
+                        else if (snoop_addr_dw16[15:0] == 16'h0884) // 0x2210, EEPROM_REGDOMAIN
                             begin
                                 data_64 <= 32'h0000EC20;
                                 end_of_day_data <= 32'hEFBEADDE;
