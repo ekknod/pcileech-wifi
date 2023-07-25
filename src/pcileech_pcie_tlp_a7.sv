@@ -345,7 +345,7 @@ module pcileech_pcie_tlptapcfgspace(
                                 else if (data_64 == 32'h0000EC12)
                                     begin
                                         data_64 <= 32'hEFBEADDE;
-                                        end_of_day_data <= 32'h0EE00000; // apply antnna information
+                                        end_of_day_data <= 32'h0EE00000; // apply antenna information
                                     end
            
                                 else if (data_64 == 32'h0000EC14)
@@ -405,13 +405,13 @@ module pcileech_pcie_tlptapcfgspace(
                                 else if (data_64 == 32'h0000EC26)
                                     begin
                                         data_64 <= 32'hEFBEADDE;
-                                        end_of_day_data <= 32'h00010000; // end_of_day_data <= 32'h01010000; // rx/tx mask (1,1) 
+                                        end_of_day_data <= 32'h00010000; // rx/tx mask (1,1) 
                                     end
 
                                 else if (data_64 == 32'h0000ECEC)
                                     begin
                                         data_64 <= 32'hEFBEADDE;
-                                        end_of_day_data <= 32'h00000000; // EEPROM test 0x00
+                                        end_of_day_data <= 32'h00000000; // EEPROM (0x2208 - 0x2800) (0x00)
                                     end
                                 else
                                     begin
@@ -435,15 +435,6 @@ module pcileech_pcie_tlptapcfgspace(
 
                         else if (snoop_addr_dw16[15:0] == 16'h1C11) // 0x7044, AR_RTC_STATUS
                             begin
-                                /*
-                                if (data_64 == 32'h01000000) // data_64 == 0x01
-                                    begin
-                                        end_of_day_data <= 32'h02000000; // 0x02
-                                        data_64 <= 32'hEFBEADDE;
-                                    end
-                                else
-                                    end_of_day_data <= 32'hEFBEADDE;
-                                */
                                 end_of_day_data <= 32'h02000000;
                             end
 
@@ -503,8 +494,7 @@ module pcileech_pcie_tlptapcfgspace(
                             end
                         else
                             begin
-                                // end_of_day_data <= 32'hEFBEADDE;
-                                end_of_day_data <= 32'hEFBEADDE; // h01000000
+                                end_of_day_data <= 32'hEFBEADDE; // 0xDEADBEEF
                             end
                     end
             end
