@@ -167,7 +167,7 @@ module pcie_7x_0_core_top # (
   parameter         PM_CAP_D2SUPPORT = "FALSE",
   parameter [7:0]   PM_CAP_NEXTPTR = 8'h50,
   parameter [4:0]   PM_CAP_PMESUPPORT = 5'h0B,
-  parameter         PM_CSR_NOSOFTRST = "TRUE",
+  parameter         PM_CSR_NOSOFTRST = "FALSE",
 
   parameter [1:0]   PM_DATA_SCALE0 = 2'h0,
   parameter [1:0]   PM_DATA_SCALE1 = 2'h0,
