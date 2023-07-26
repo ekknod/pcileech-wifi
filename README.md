@@ -6,7 +6,7 @@ pcileech-fpga with wireless card emulation
 
 # before building
 Make sure to change line **202** (pcileech_pcie_tlp_a7.sv)  
-to match your base address register. in my systems, ranges start with **(0xF)** **0xF**8F0000  
+to match your base address register. in my system, ranges start with **(0xF)** **0xF**8F0000  
 so i used (snoop_addr_id == 4'hF); for TLP validation.
 
 ```
