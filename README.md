@@ -21,7 +21,7 @@ end_of_day_data <= 32'h81080000; // MAC1 information
 end_of_day_data <= 32'hC4C00000; // MAC2 information
 ```
 
-# Known issues, fix to-do
+# Known issues, to-do
 AMD systems are not supported for unresolved reason. when i started this project  
 i found out AMD systems can access only certain addresses (0x00, 0x80, 0x180) from BAR.  
 TLP validation could be done better as well -> with better "BAR hit" detection.  
