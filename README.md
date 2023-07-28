@@ -13,7 +13,9 @@ end_of_day_data <= 32'hC4C00000; // MAC2 information
 ```
 
 # Known issues, to-do
-AMD / Intel z690 systems are not supported for unresolved reason.
+AMD / Intel z690 systems are not supported for unresolved reason.  
+My own knowledge is not yet good enough for resolving it.  
+maybe someone who can debug these FPGA cards could find it out.  
 
 # Usage
 Research only. this firmware was created to look up current stage of anti-cheats FPGA protection and  
