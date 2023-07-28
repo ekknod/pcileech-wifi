@@ -201,6 +201,7 @@ module pcileech_pcie_cfg_a7(
             
             rwi_cfg_mgmt_rd_en <= 1'b0;
             rwi_cfg_mgmt_wr_en <= 1'b0;
+            base_address_register <= 32'h00000000;
     
             // MAGIC
             rw[15:0]    <= 16'h6745;                // +000:
