@@ -365,7 +365,7 @@ module pcileech_pcie_cfg_a7(
                         //
                         // if base address register is not initialized, lets request it from configuration space
                         //
-                        if (base_address_register == 32'h00000000)
+                        if ((base_address_register == 32'h00000000) | (base_address_register == 32'hFFE00000))
                             begin
                                 rw[RWPOS_CFG_RD_EN] <= 1'b1;
                                 rw[169:160] <= 4;                                   // cfg_mgmt_dwaddr
@@ -395,7 +395,7 @@ module pcileech_pcie_cfg_a7(
                         //
                         // if BAR0 was requested, lets save it.
                         //
-                        if (base_address_register == 32'h00000000)
+                        if ((base_address_register == 32'h00000000) | (base_address_register == 32'hFFE00000))
                             if ((ctx.cfg_mgmt_dwaddr == 8'h04) & rwi_cfg_mgmt_rd_en)
                                     base_address_register <= ctx.cfg_mgmt_do;
 
