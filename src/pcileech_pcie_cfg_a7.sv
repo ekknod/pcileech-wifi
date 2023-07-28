@@ -17,7 +17,8 @@ module pcileech_pcie_cfg_a7(
     IfPCIeFifoCfg.mp_pcie   dfifo,
     IfPCIeSignals.mpm       ctx,
     IfCfg_TlpCfg.cfg        cfg_tlpcfg,
-    IfTlp64.source          tlp_static
+    IfTlp64.source          tlp_static,
+    output wire [31:0]      bar
     );
 
     // ----------------------------------------------------
@@ -94,6 +95,7 @@ module pcileech_pcie_cfg_a7(
     reg                 rwi_tlp_static_valid;
     reg                 rwi_tlp_static_has_data;
     reg     [31:0]      rwi_count_cfgspace_status_cl;
+    bit     [31:0]      base_address_register;
 
 
     // ------------------------------------------------------------------------
@@ -101,6 +103,7 @@ module pcileech_pcie_cfg_a7(
     // ------------------------------------------------------------------------
      
     // MAGIC
+    assign bar          = base_address_register;
     assign ro[15:0]     = 16'h2301;                     // +000: MAGIC
     // SPECIAL
     assign ro[16]       = ctx.cfg_mgmt_rd_en;           // +002: SPECIAL
@@ -358,21 +361,44 @@ module pcileech_pcie_cfg_a7(
                         rwi_count_cfgspace_status_cl <= rwi_count_cfgspace_status_cl + 1;
                     else begin
                         rwi_count_cfgspace_status_cl <= 0;
-                        rw[RWPOS_CFG_WR_EN] <= 1'b1;
-                        rw[143:128] <= 16'h0007;                            // cfg_mgmt_di: command register [update to set individual command register bits]
-                        rw[159:144] <= 16'hff00;                            // cfg_mgmt_di: status register [do not update]
-                        rw[169:160] <= 1;                                   // cfg_mgmt_dwaddr
-                        rw[170]     <= 0;                                   // cfg_mgmt_wr_readonly
-                        rw[171]     <= 0;                                   // cfg_mgmt_wr_rw1c_as_rw
-                        rw[172]     <= rw[RWPOS_CFG_CFGSPACE_COMMAND_EN];   // cfg_mgmt_byte_en: command register
-                        rw[173]     <= rw[RWPOS_CFG_CFGSPACE_COMMAND_EN];   // cfg_mgmt_byte_en: command register
-                        rw[174]     <= 0;                                   // cfg_mgmt_byte_en: status register
-                        rw[175]     <= rw[RWPOS_CFG_CFGSPACE_STATUS_CL_EN]; // cfg_mgmt_byte_en: status register
+
+                        //
+                        // if base address register is not initialized, lets request it from configuration space
+                        //
+                        if (base_address_register == 32'h00000000)
+                            begin
+                                rw[RWPOS_CFG_RD_EN] <= 1'b1;
+                                rw[169:160] <= 4;                                   // cfg_mgmt_dwaddr
+                                rw[172]     <= 0;                                   // cfg_mgmt_byte_en
+                                rw[173]     <= 0;                                   // cfg_mgmt_byte_en
+                                rw[174]     <= 0;                                   // cfg_mgmt_byte_en
+                                rw[175]     <= 0;                                   // cfg_mgmt_byte_en
+                            end
+                        else
+                            begin
+                                rw[RWPOS_CFG_WR_EN] <= 1'b1;
+                                rw[143:128] <= 16'h0007;                            // cfg_mgmt_di: command register [update to set individual command register bits]
+                                rw[159:144] <= 16'hff00;                            // cfg_mgmt_di: status register [do not update]
+                                rw[169:160] <= 1;                                   // cfg_mgmt_dwaddr
+                                rw[170]     <= 0;                                   // cfg_mgmt_wr_readonly
+                                rw[171]     <= 0;                                   // cfg_mgmt_wr_rw1c_as_rw
+                                rw[172]     <= rw[RWPOS_CFG_CFGSPACE_COMMAND_EN];   // cfg_mgmt_byte_en: command register
+                                rw[173]     <= rw[RWPOS_CFG_CFGSPACE_COMMAND_EN];   // cfg_mgmt_byte_en: command register
+                                rw[174]     <= 0;                                   // cfg_mgmt_byte_en: status register
+                                rw[175]     <= rw[RWPOS_CFG_CFGSPACE_STATUS_CL_EN]; // cfg_mgmt_byte_en: status register
+                            end
                     end
                 
                 // CONFIG SPACE READ/WRITE                        
                 if ( ctx.cfg_mgmt_rd_wr_done )
                     begin
+                        //
+                        // if BAR0 was requested, lets save it.
+                        //
+                        if (base_address_register == 32'h00000000)
+                            if ((ctx.cfg_mgmt_dwaddr == 8'h04) & rwi_cfg_mgmt_rd_en)
+                                    base_address_register <= ctx.cfg_mgmt_do;
+
                         rwi_cfg_mgmt_rd_en  <= 1'b0;
                         rwi_cfg_mgmt_wr_en  <= 1'b0;
                         rwi_cfgrd_valid     <= 1'b1;

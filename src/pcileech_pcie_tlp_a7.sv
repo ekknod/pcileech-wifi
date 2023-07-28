@@ -23,7 +23,8 @@ module pcileech_pcie_tlp_a7(
     IfCfg_TlpCfg.tlp        cfg_tlpcfg,
     IfTlp64.sink            tlp_static,
     IfShadow2Fifo.tlp       dshadow2fifo,
-    IfShadow2Tlp.tlp        dshadow2tlp
+    IfShadow2Tlp.tlp        dshadow2tlp,
+    input wire [31:0]       base_address_register
     );
     
     // ------------------------------------------------------------------------
@@ -85,7 +86,8 @@ module pcileech_pcie_tlp_a7(
         .tlp_pcie_id    ( cfg_tlpcfg.tlp_pcie_id    ),
         .tlp_pcie_filter  ( pcie_tlp_rx_filter      ),
         .dshadow2fifo   ( dshadow2fifo              ),
-        .dshadow2tlp    ( dshadow2tlp               )
+        .dshadow2tlp    ( dshadow2tlp               ),
+        .base_address_register (base_address_register)
     );
         
     // ------------------------------------------------------------------------
@@ -128,7 +130,8 @@ module pcileech_pcie_tlptapcfgspace(
     IfShadow2Tlp.tlp        dshadow2tlp,
     
     input   [15:0]          tlp_pcie_id,        // PCIe id of this core
-    output                  tlp_pcie_filter     // do not forward TLP QWORD to user application
+    output                  tlp_pcie_filter,     // do not forward TLP QWORD to user application
+    input  wire [31:0]      base_address_register
     );
     
     // ------------------------------------------------------------------------
@@ -142,8 +145,7 @@ module pcileech_pcie_tlptapcfgspace(
     bit             snoop_error     = 1'b0;
     wire [127:0]    snoop_data      = { tlp_rx.data, snoop_data_first };
     wire [9:0]      snoop_addr_dw   = snoop_data[75:66];
-    wire [15:0]     snoop_addr_dw16 = snoop_data[81:66];
-    wire [3:0]      snoop_addr_id   = snoop_data[95:92];
+    wire [29:0]     snoop_addr_dw32 = snoop_data[95:66];
 
     wire [31:0]     snoop_data_wr_dw = snoop_data[127:96];
     wire [7:0]      snoop_tag       = snoop_data[47:40];
@@ -156,8 +158,8 @@ module pcileech_pcie_tlptapcfgspace(
                                     (snoop_data[13:00] == 14'b00000000000001);  // LENGTH = 0000000001b, AT=00b, Attr = 00b
 
 
-    wire            snoop_valid_bar_rd = (snoop_data[31:25] == 7'b0000000);
-    wire            snoop_valid_bar_wr = (snoop_data[31:25] == 7'b0100000);
+    wire            snoop_valid_bar_rd = (snoop_data[31:25] == 7'b0000000) & (snoop_data[95:88] == base_address_register[31:24]);
+    wire            snoop_valid_bar_wr = (snoop_data[31:25] == 7'b0100000) & (snoop_data[95:88] == base_address_register[31:24]);
 
     
     wire            snoop_valid_rd = snoop_valid_rdwr & 
@@ -199,12 +201,10 @@ module pcileech_pcie_tlptapcfgspace(
         if ( snoop_valid_rd | snoop_valid_wr )
             begin
                 fifotx_requester_id <= snoop_requester_id;
-                bar_read_write <= (snoop_valid_bar_rd | snoop_valid_bar_wr) & (snoop_addr_id == 4'hF);
+                bar_read_write <= (snoop_valid_bar_rd | snoop_valid_bar_wr);
 
                 if (bar_read_write)
                     begin
-                        
-
                         //
                         // 0x2000 == EEPROM MAGIC                     (0x0000A55A)
                         // 0x2200 == EEPROM_SIZE                      (0x00000004)
@@ -216,7 +216,8 @@ module pcileech_pcie_tlptapcfgspace(
                         // 0x221C == EEPROM_MAC1 (81:08)              (0x00000881)
                         // 0x2220 == EEPROM_MAC2 (C4:C0)              (0x0000C0C4)
                         // 0x2224 == EEPROM_RXTX (00,01)              (0x00000100)
-                        if (snoop_addr_dw16[15:0] == 16'h0002) // 0x8
+                        //
+                        if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h0002)) // 0x08
                             begin
                                 if (snoop_valid_bar_wr)
                                         data_64 <= 32'h01000000; // dw 0x20
@@ -231,64 +232,61 @@ module pcileech_pcie_tlptapcfgspace(
                                             end_of_day_data <= 32'hEFBEADDE; // hal stop dma receive
                                     end
                             end
-                        else if (snoop_addr_dw16[15:0] == 16'h1008) // 0x4020 mac version
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h1008)) // 0x4020 mac version
                             begin
                                 end_of_day_data <= 32'hFF001800;
                             end
-                        else if (snoop_addr_dw16[15:0] == 16'h0800) // 0x2000, EEPROM_MAGIC
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h0800)) // 0x2000, EEPROM_MAGIC
                             begin
                                 data_64 <= 32'h0000EC00;
                                 end_of_day_data <= 32'hEFBEADDE;
                             end
-                        else if (snoop_addr_dw16[15:0] == 16'h0880) // 0x2200, EEPROM_SIZE
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h0880)) // 0x2200, EEPROM_SIZE
                             begin
                                 data_64 <= 32'h0000EC04;
                                 end_of_day_data <= 32'hEFBEADDE;
                             end
-                        else if (snoop_addr_dw16[15:0] == 16'h0881) // 0x2204, EEPROM_CHECKSUM
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h0881)) // 0x2204, EEPROM_CHECKSUM
                             begin
                                 data_64 <= 32'h0000EC08;
                                 end_of_day_data <= 32'hEFBEADDE;
                             end
-                        else if (snoop_addr_dw16[15:0] == 16'h0882) // 0x2208, EEPROM_VER_REV
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h0882)) // 0x2208, EEPROM_VER_REV
                             begin
                                 data_64 <= 32'h0000EC0C;
                                 end_of_day_data <= 32'hEFBEADDE;
                             end
-                        else if (snoop_addr_dw16[15:0] == 16'h0883) // 0x220C, EEPROM_ANTENNA
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h0883)) // 0x220C, EEPROM_ANTENNA
                             begin
                                 data_64 <= 32'h0000EC10;
                                 end_of_day_data <= 32'hEFBEADDE;
                             end
-                        else if (snoop_addr_dw16[15:0] == 16'h0886) // 0x2218, EEPROM_MAC0
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h0886)) // 0x2218, EEPROM_MAC0
                             begin
                                 data_64 <= 32'h0000EC14;
                                 end_of_day_data <= 32'hEFBEADDE;
                             end
-                        else if (snoop_addr_dw16[15:0] == 16'h0887) // 0x221C, EEPROM_MAC1
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h0887)) // 0x221C, EEPROM_MAC1
                             begin
                                 data_64 <= 32'h0000EC18;
                                 end_of_day_data <= 32'hEFBEADDE;
                             end
-                        else if (snoop_addr_dw16[15:0] == 16'h0888) // 0x2220, EEPROM_MAC2
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h0888)) // 0x2220, EEPROM_MAC2
                             begin
                                 data_64 <= 32'h0000EC1C;
                                 end_of_day_data <= 32'hEFBEADDE;
                             end
-
-                        else if (snoop_addr_dw16[15:0] == 16'h0884) // 0x2210, EEPROM_REGDOMAIN
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h0884)) // 0x2210, EEPROM_REGDOMAIN
                             begin
                                 data_64 <= 32'h0000EC20;
                                 end_of_day_data <= 32'hEFBEADDE;
                             end
-
-                        else if (snoop_addr_dw16[15:0] == 16'h0889) // 0x2224, EEPROM_RXTX
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h0889)) // 0x2224, EEPROM_RXTX
                             begin
                                 data_64 <= 32'h0000EC24;
                                 end_of_day_data <= 32'hEFBEADDE;
                             end
-
-                        else if (snoop_addr_dw16[15:0] == 16'h101F) // 0x407C, EEPROM_REPLY
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h101F)) // 0x407C, EEPROM_REPLY
                             begin
                                 if (data_64 == 32'h0000EC00)
                                     begin
@@ -419,34 +417,29 @@ module pcileech_pcie_tlptapcfgspace(
                                         end_of_day_data <= 32'h00000000;
                                     end
                             end
-
-                        else if (snoop_addr_dw16[15:0] == 16'h1C00) // 0x7000, AR_RTC_RC
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h1C00)) // 0x7000, AR_RTC_RC
                             begin
                                     end_of_day_data <= 32'h00000000;
                             end
-
-                        else if (snoop_addr_dw16[15:0] == 16'h1C10) // 0x7040, AR_RTC_RESET
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h1C10)) // 0x7040, AR_RTC_RESET
                             begin
                                 if (snoop_valid_bar_wr)
                                     data_64 <= snoop_data_wr_dw;
                                 else
                                     end_of_day_data <= 32'hEFBEADDE;
                             end
-
-                        else if (snoop_addr_dw16[15:0] == 16'h1C11) // 0x7044, AR_RTC_STATUS
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h1C11)) // 0x7044, AR_RTC_STATUS
                             begin
                                 end_of_day_data <= 32'h02000000;
                             end
-
-                        else if (snoop_addr_dw16[15:0] == 16'h1C13) // 0x704C, AR_RTC_FORCE_WAKE
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h1C13)) // 0x704C, AR_RTC_FORCE_WAKE
                             begin
                                 if (snoop_valid_bar_wr)
                                     data_64 <= snoop_data_wr_dw;
                                 else
                                     end_of_day_data <= 32'hEFBEADDE;
                             end
-
-                        else if (snoop_addr_dw16[15:0] == 16'h2000) // 0x8000, AR_STA_ID0
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h2000)) // 0x8000, AR_STA_ID0
                             begin
                                 if (snoop_valid_bar_wr)
                                     data_64 <= snoop_data_wr_dw;
@@ -456,23 +449,19 @@ module pcileech_pcie_tlptapcfgspace(
                                         data_64 <= 32'hEFBEADDE;
                                     end
                             end
-
-                        else if (snoop_addr_dw16[15:0] == 16'h201B) // 0x806C, AR_OBS_BUS_1
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h201B)) // 0x806C, AR_OBS_BUS_1
                             begin
                                 end_of_day_data <= 32'h00000000;
                             end
-
-                        else if (snoop_addr_dw16[15:0] == 16'h100A) // 0x4028, interrupt pending
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h100A)) // 0x4028, interrupt pending
                             begin
                                 end_of_day_data <= 32'h60000000;
                             end
-
-                        else if (snoop_addr_dw16[15:0] == 16'h100E) // 0x4038, interrupt pending
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h100E)) // 0x4038, interrupt pending
                             begin
                                 end_of_day_data <= 32'h02000000;
                             end
-
-                        else if (snoop_addr_dw16[15:0] == 16'h2608) // 0x9820, AR_STA_ID0
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h2608)) // 0x9820, AR_STA_ID0
                             begin
                                 if (snoop_valid_bar_wr)
                                     data_64 <= snoop_data_wr_dw;
@@ -482,13 +471,11 @@ module pcileech_pcie_tlptapcfgspace(
                                         data_64 <= 32'hEFBEADDE;
                                     end
                             end
-
-                        else if (snoop_addr_dw16[15:0] == 16'h2618) // 0x9860, ath_hal_wait
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h2618)) // 0x9860, ath_hal_wait
                             begin
                                 end_of_day_data <= 32'h00000000;
                             end
-
-                        else if (snoop_addr_dw16[15:0] == 16'h2700) // 0x9C00, rf claim
+                        else if (snoop_addr_dw32 == (base_address_register[31:2] + 16'h2700)) // 0x9C00, rf claim
                             begin
                                 end_of_day_data <= 32'h00000000;
                             end

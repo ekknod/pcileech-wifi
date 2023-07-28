@@ -70,6 +70,8 @@ module pcileech_pcie_a7(
     // PCIe CFG RX/TX <--> FIFO below
     // ----------------------------------------------------------------------------
     
+    wire [31:0] base_address_register;
+
     pcileech_pcie_cfg_a7 i_pcileech_pcie_cfg_a7(
         .rst                        ( rst_subsys                ),
         .clk_100                    ( clk_100                   ),
@@ -77,7 +79,8 @@ module pcileech_pcie_a7(
         .dfifo                      ( dfifo_cfg                 ),        
         .ctx                        ( ctx                       ),
         .cfg_tlpcfg                 ( cfg_tlpcfg                ),
-        .tlp_static                 ( tlp_static                )
+        .tlp_static                 ( tlp_static                ),
+        .bar                        ( base_address_register     )
     );
     
     // ----------------------------------------------------------------------------
@@ -94,7 +97,8 @@ module pcileech_pcie_a7(
         .cfg_tlpcfg                 ( cfg_tlpcfg                ),
         .tlp_static                 ( tlp_static                ),
         .dshadow2fifo               ( dshadow2fifo_tlp          ),
-        .dshadow2tlp                ( dshadow2tlp.tlp           )
+        .dshadow2tlp                ( dshadow2tlp.tlp           ),
+        .base_address_register      ( base_address_register     )
     );
     
     // ----------------------------------------------------------------------------
