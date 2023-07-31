@@ -144,7 +144,6 @@ module pcileech_pcie_tlptapcfgspace(
     bit             snoop_first_n   = 1'b0;
     bit             snoop_error     = 1'b0;
     wire [127:0]    snoop_data      = { tlp_rx.data, snoop_data_first };
-    wire [9:0]      snoop_addr_dw   = snoop_data[75:66];
     wire [29:0]     snoop_addr_dw32 = snoop_data[95:66];
 
     wire [31:0]     snoop_data_wr_dw = snoop_data[127:96];
@@ -491,7 +490,7 @@ module pcileech_pcie_tlptapcfgspace(
         .rst            ( rst                       ),
         .wr_clk         ( clk_pcie                  ),
         .rd_clk         ( clk_100                   ),
-        .din            ( {snoop_valid_rd, snoop_be, snoop_addr_dw, snoop_tag, snoop_data_wr_dw}  ),
+        .din            ( {snoop_valid_rd, snoop_be, 10'b0000000000, snoop_tag, snoop_data_wr_dw}  ),
         .wr_en          ( snoop_valid_rd | snoop_valid_wr   ),
         .rd_en          ( 1'b1                      ),
         .dout           ( {fifotx_tlprd, dshadow2tlp.rx_be, dshadow2tlp.rx_addr, dshadow2tlp.rx_tag, dshadow2tlp.rx_data} ),    
