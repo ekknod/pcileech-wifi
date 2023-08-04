@@ -18,5 +18,4 @@ My own knowledge is not yet good enough for resolving it.
 maybe someone who can debug these FPGA cards could find it out.  
 
 # Usage
-Research only. this firmware was created to look up current stage of anti-cheats FPGA protection and  
-to my surprise, **Vanguard** handles this job very nicely. Good job. 
+This firmware was created for researching purposes only.  
