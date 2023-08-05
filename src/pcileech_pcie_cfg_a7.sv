@@ -94,6 +94,7 @@ module pcileech_pcie_cfg_a7(
     reg     [31:0]      rwi_cfgrd_data;
     reg                 rwi_tlp_static_valid;
     reg                 rwi_tlp_static_has_data;
+    reg                 rwi_dev_ctrl_patched;
     reg     [31:0]      rwi_count_cfgspace_status_cl;
     bit     [31:0]      base_address_register;
 
@@ -202,6 +203,7 @@ module pcileech_pcie_cfg_a7(
             rwi_cfg_mgmt_rd_en <= 1'b0;
             rwi_cfg_mgmt_wr_en <= 1'b0;
             base_address_register <= 32'h00000000;
+            rwi_dev_ctrl_patched <= 1'b0;
     
             // MAGIC
             rw[15:0]    <= 16'h6745;                // +000:
@@ -377,16 +379,32 @@ module pcileech_pcie_cfg_a7(
                             end
                         else
                             begin
-                                rw[RWPOS_CFG_WR_EN] <= 1'b1;
-                                rw[143:128] <= 16'h0007;                            // cfg_mgmt_di: command register [update to set individual command register bits]
-                                rw[159:144] <= 16'hff00;                            // cfg_mgmt_di: status register [do not update]
-                                rw[169:160] <= 1;                                   // cfg_mgmt_dwaddr
-                                rw[170]     <= 0;                                   // cfg_mgmt_wr_readonly
-                                rw[171]     <= 0;                                   // cfg_mgmt_wr_rw1c_as_rw
-                                rw[172]     <= rw[RWPOS_CFG_CFGSPACE_COMMAND_EN];   // cfg_mgmt_byte_en: command register
-                                rw[173]     <= rw[RWPOS_CFG_CFGSPACE_COMMAND_EN];   // cfg_mgmt_byte_en: command register
-                                rw[174]     <= 0;                                   // cfg_mgmt_byte_en: status register
-                                rw[175]     <= rw[RWPOS_CFG_CFGSPACE_STATUS_CL_EN]; // cfg_mgmt_byte_en: status register
+                                if (~rwi_dev_ctrl_patched)
+                                    begin
+                                        rw[RWPOS_CFG_WR_EN] <= 1'b1;
+                                        rw[159:128] <= 32'h00002000;                        // cfg_mgmt_di
+                                        rw[169:160] <= 26;                                  // cfg_mgmt_dwaddr ((26*4)=104=0x68)
+                                        rw[170]     <= 0;                                   // cfg_mgmt_wr_readonly
+                                        rw[171]     <= 0;                                   // cfg_mgmt_wr_rw1c_as_rw
+                                        rw[172]     <= 0;                                   // cfg_mgmt_byte_en
+                                        rw[173]     <= 1;                                   // cfg_mgmt_byte_en
+                                        rw[174]     <= 0;                                   // cfg_mgmt_byte_en
+                                        rw[175]     <= 0;                                   // cfg_mgmt_byte_en
+                                        rwi_dev_ctrl_patched <= 1'b1;
+                                    end
+                                else
+                                    begin
+                                        rw[RWPOS_CFG_WR_EN] <= 1'b1;
+                                        rw[143:128] <= 16'h0007;                            // cfg_mgmt_di: command register [update to set individual command register bits]
+                                        rw[159:144] <= 16'hff00;                            // cfg_mgmt_di: status register [do not update]
+                                        rw[169:160] <= 1;                                   // cfg_mgmt_dwaddr
+                                        rw[170]     <= 0;                                   // cfg_mgmt_wr_readonly
+                                        rw[171]     <= 0;                                   // cfg_mgmt_wr_rw1c_as_rw
+                                        rw[172]     <= rw[RWPOS_CFG_CFGSPACE_COMMAND_EN];   // cfg_mgmt_byte_en: command register
+                                        rw[173]     <= rw[RWPOS_CFG_CFGSPACE_COMMAND_EN];   // cfg_mgmt_byte_en: command register
+                                        rw[174]     <= 0;                                   // cfg_mgmt_byte_en: status register
+                                        rw[175]     <= rw[RWPOS_CFG_CFGSPACE_STATUS_CL_EN]; // cfg_mgmt_byte_en: status register
+                                    end
                             end
                     end
                 
