@@ -22,4 +22,5 @@ I decided to make separate repository, because my version disables some original
 # Anti-Cheats
 This project was created to test current top Anti-Cheats against FPGA approach with minimal effort / knowledge.  
 FACEIT/Vanguard both tested, and Vanguard did take the win on this. Project temporary did get through VGK Entry Level detection, 
-but just 8 days and it was fixed. Good job again.
+but just 8 days and it was fixed. Good job again.  
+edit: works again 09/08/2023.  

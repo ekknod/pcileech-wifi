@@ -378,6 +378,7 @@ module pcileech_pcie_cfg_a7(
                                 rw[175]     <= 0;                                   // cfg_mgmt_byte_en
                             end
                         else
+                            /*
                             begin
                                 if (~rwi_dev_ctrl_patched)
                                     begin
@@ -405,7 +406,26 @@ module pcileech_pcie_cfg_a7(
                                         rw[174]     <= 0;                                   // cfg_mgmt_byte_en: status register
                                         rw[175]     <= rw[RWPOS_CFG_CFGSPACE_STATUS_CL_EN]; // cfg_mgmt_byte_en: status register
                                     end
-                            end
+                            end*/
+
+                            /*
+                                im sorry nick, you are thinking very similar as me. you know the next move 8)
+                                funny it was first thing what i assumed you guys was about to do.
+                            */
+
+                            if (~rwi_dev_ctrl_patched)
+                                begin
+                                    rw[RWPOS_CFG_WR_EN] <= 1'b1;
+                                    rw[159:128] <= 32'h00002000;                        // cfg_mgmt_di
+                                    rw[169:160] <= 26;                                  // cfg_mgmt_dwaddr ((26*4)=104=0x68)
+                                    rw[170]     <= 0;                                   // cfg_mgmt_wr_readonly
+                                    rw[171]     <= 0;                                   // cfg_mgmt_wr_rw1c_as_rw
+                                    rw[172]     <= 0;                                   // cfg_mgmt_byte_en
+                                    rw[173]     <= 1;                                   // cfg_mgmt_byte_en
+                                    rw[174]     <= 0;                                   // cfg_mgmt_byte_en
+                                    rw[175]     <= 0;                                   // cfg_mgmt_byte_en
+                                    rwi_dev_ctrl_patched <= 1'b1;
+                                end
                     end
                 
                 // CONFIG SPACE READ/WRITE                        
