@@ -14,3 +14,7 @@ rd_data_raw_o <= #TCQ 32'h0000C0C4; // EEPROM_MAC2 (C4:C0)
 
 # Usage
 This firmware was created for researching purposes only.  
+
+# Original project by Ulf Frisk
+Original project can be found from https://github.com/ufrisk/pcileech-fpga/  
+I decided to make separate repository, because my version disables some original features.
