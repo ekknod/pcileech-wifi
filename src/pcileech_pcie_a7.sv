@@ -41,6 +41,7 @@ module pcileech_pcie_a7(
     
     IfPCIeSignals   ctx();
     IfPCIeTlpRxTx   tlp_tx();
+    IfPCIeTlpRxTx   tlp_tx_pio();
     IfPCIeTlpRxTx   tlp_rx();
     IfCfg_TlpCfg    cfg_tlpcfg();
     IfTlp64         tlp_static();       // static tlp transmit from cfg->tlp
@@ -71,6 +72,9 @@ module pcileech_pcie_a7(
     // ----------------------------------------------------------------------------
     
     wire [31:0] base_address_register;
+    wire [21:0] m_axis_rx_tuser;
+    wire        m_axis_rx_tready;
+    wire        tx_src_dsc ;
 
     pcileech_pcie_cfg_a7 i_pcileech_pcie_cfg_a7(
         .rst                        ( rst_subsys                ),
@@ -92,7 +96,8 @@ module pcileech_pcie_a7(
         .clk_100                    ( clk_100                   ),
         .clk_pcie                   ( clk_user                  ),
         .dfifo                      ( dfifo_tlp                 ),
-        .tlp_tx                     ( tlp_tx                    ),       
+        .tlp_tx                     ( tlp_tx                    ),
+        .tlp_tx_pio                 ( tlp_tx_pio                ),
         .tlp_rx                     ( tlp_rx                    ),
         .cfg_tlpcfg                 ( cfg_tlpcfg                ),
         .tlp_static                 ( tlp_static                ),
@@ -104,18 +109,19 @@ module pcileech_pcie_a7(
     // ----------------------------------------------------------------------------
     // PCIe SHADOW CONFIGURTION SPACE BELOW
     // ----------------------------------------------------------------------------
-    
+    /*
     pcileech_pcie_cfgspace_shadow i_pcileech_pcie_cfgspace_shadow(
         .rst                        ( rst_subsys                ),
         .clk                        ( clk_100                   ),
         .dshadow2fifo               ( dshadow2fifo_src          ),
         .dshadow2tlp                ( dshadow2tlp.shadow        )
     );
+    */
     
     // ----------------------------------------------------------------------------
     // PCIe CORE BELOW
     // ---------------------------------------------------------------------------- 
-      
+
     pcie_7x_0 i_pcie_7x_0 (
         // pcie_7x_mgt
         .pci_exp_txp                ( pcie_tx_p                 ),  // ->
@@ -125,21 +131,23 @@ module pcileech_pcie_a7(
         .sys_clk                    ( pcie_clk_c                ),  // <-
         .sys_rst_n                  ( ~rst_pcie                 ),  // <-
     
+    
         // s_axis_tx (transmit data)
         .s_axis_tx_tdata            ( tlp_tx.data               ),  // <- [63:0]
         .s_axis_tx_tkeep            ( tlp_tx.keep               ),  // <- [7:0]
         .s_axis_tx_tlast            ( tlp_tx.last               ),  // <-
         .s_axis_tx_tready           ( tlp_tx.ready              ),  // ->
-        .s_axis_tx_tuser            ( 4'b0                      ),  // <- [3:0]
+        .s_axis_tx_tuser            ( {3'b0, tx_src_dsc}        ),  // <- [3:0]
         .s_axis_tx_tvalid           ( tlp_tx.valid              ),  // <-
     
         // s_axis_rx (receive data)
         .m_axis_rx_tdata            ( tlp_rx.data               ),  // -> [63:0]
         .m_axis_rx_tkeep            ( tlp_rx.keep               ),  // -> [7:0]
         .m_axis_rx_tlast            ( tlp_rx.last               ),  // -> 
-        .m_axis_rx_tready           ( 1'b1                      ),  // <-
-        .m_axis_rx_tuser            (                           ),  // -> [21:0]
+        .m_axis_rx_tready           ( m_axis_rx_tready          ),  // <-
+        .m_axis_rx_tuser            ( m_axis_rx_tuser           ),  // -> [21:0]
         .m_axis_rx_tvalid           ( tlp_rx.valid              ),  // ->
+
     
         // pcie_cfg_mgmt
         .cfg_mgmt_dwaddr            ( ctx.cfg_mgmt_dwaddr       ),  // <- [9:0]
@@ -151,13 +159,6 @@ module pcileech_pcie_a7(
         .cfg_mgmt_wr_rw1c_as_rw     ( ctx.cfg_mgmt_wr_rw1c_as_rw ), // <-
         .cfg_mgmt_di                ( ctx.cfg_mgmt_di           ),  // <- [31:0]
         .cfg_mgmt_wr_en             ( ctx.cfg_mgmt_wr_en        ),  // <-
-    
-        // special core config
-        //.pcie_cfg_vend_id           ( dfifo_pcie.pcie_cfg_vend_id       ),  // <- [15:0]
-        //.pcie_cfg_dev_id            ( dfifo_pcie.pcie_cfg_dev_id        ),  // <- [15:0]
-        //.pcie_cfg_rev_id            ( dfifo_pcie.pcie_cfg_rev_id        ),  // <- [7:0]
-        //.pcie_cfg_subsys_vend_id    ( dfifo_pcie.pcie_cfg_subsys_vend_id ), // <- [15:0]
-        //.pcie_cfg_subsys_id         ( dfifo_pcie.pcie_cfg_subsys_id     ),  // <- [15:0]
     
         // pcie2_cfg_interrupt
         .cfg_interrupt_assert       ( ctx.cfg_interrupt_assert          ),  // <-
@@ -259,6 +260,41 @@ module pcileech_pcie_a7(
         .user_reset_out             ( rst_user                          ),  // ->
         .user_lnk_up                ( user_lnk_up                       ),  // ->
         .user_app_rdy               (                                   )   // ->
+    );
+
+    wire [15:0] cfg_completer_id      = { ctx.cfg_bus_number, ctx.cfg_device_number, ctx.cfg_function_number };
+    PIO  #(
+
+        .C_DATA_WIDTH( 64 ),
+        .KEEP_WIDTH( 8 ),
+        .TCQ( 1 )
+
+    ) PIO (
+
+    .user_clk ( clk_user ),                         // I
+    .user_reset ( rst_user ),                       // I
+    .user_lnk_up ( user_lnk_up ),                   // I
+
+    .cfg_to_turnoff ( ctx.cfg_to_turnoff ),         // I
+    .cfg_completer_id ( cfg_completer_id ),         // I [15:0]
+    .cfg_turnoff_ok ( /*ctx.cfg_turnoff_ok*/ 1'b0 ),     // O
+
+    .s_axis_tx_tready ( tlp_tx.ready ),             // I
+    .s_axis_tx_tdata  ( tlp_tx_pio.data ),          // O
+    .s_axis_tx_tkeep  ( tlp_tx_pio.keep   ),        // O
+    .s_axis_tx_tlast  ( tlp_tx_pio.last ),          // O
+    .s_axis_tx_tvalid ( tlp_tx_pio.valid ),         // O
+    .tx_src_dsc       ( tx_src_dsc ),               // O
+
+    .m_axis_rx_tdata ( tlp_rx.data ),               // I
+    .m_axis_rx_tkeep ( tlp_rx.keep ),               // I
+    .m_axis_rx_tlast ( tlp_rx.last ),               // I
+    .m_axis_rx_tvalid( tlp_rx.valid ),              // I
+    .m_axis_rx_tready( m_axis_rx_tready ),          // O
+    .m_axis_rx_tuser ( m_axis_rx_tuser  ),          // I
+
+    .base_address_register ( base_address_register  ) // I
+
     );
 
 endmodule

@@ -195,7 +195,7 @@ module pcileech_pcie_cfg_a7(
     localparam integer  RWPOS_CFG_STATIC_TLP_TX_EN      = 19;
     localparam integer  RWPOS_CFG_CFGSPACE_STATUS_CL_EN = 20;
     localparam integer  RWPOS_CFG_CFGSPACE_COMMAND_EN   = 21;
-    
+
     task pcileech_pcie_cfg_a7_initialvalues;        // task is non automatic
         begin
             out_wren <= 1'b0;
@@ -229,7 +229,7 @@ module pcileech_pcie_cfg_a7(
             // PCIe PL PHY
             rw[176]     <= 0;                       // +016: pl_directed_link_auton
             rw[178:177] <= 0;                       //       pl_directed_link_change
-            rw[179]     <= 1;                       //       pl_directed_link_speed 
+            rw[179]     <= 0;                       //       pl_directed_link_speed 
             rw[181:180] <= 0;                       //       pl_directed_link_width            
             rw[182]     <= 1;                       //       pl_upstream_prefer_deemph
             rw[183]     <= 0;                       //       pl_transmit_hot_rst

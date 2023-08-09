@@ -155,6 +155,13 @@ set files [list \
  [file normalize "${origin_dir}/pcie_7x/pcie_7x_0_qpll_reset.v"]\
  [file normalize "${origin_dir}/pcie_7x/pcie_7x_0_qpll_wrapper.v"]\
  [file normalize "${origin_dir}/pcie_7x/pcie_7x_0_rxeq_scan.v"]\
+ [file normalize "${origin_dir}/pio/EP_MEM.v"]\
+ [file normalize "${origin_dir}/pio/PIO.v"]\
+ [file normalize "${origin_dir}/pio/PIO_EP.v"]\
+ [file normalize "${origin_dir}/pio/PIO_EP_MEM_ACCESS.v"]\
+ [file normalize "${origin_dir}/pio/PIO_RX_ENGINE.v"]\
+ [file normalize "${origin_dir}/pio/PIO_TX_ENGINE.v"]\
+ [file normalize "${origin_dir}/pio/PIO_TO_CTRL.v"]\
 ]
 set imported_files [import_files -fileset sources_1 $files]
 
@@ -358,6 +365,33 @@ set file "pcie_7x/pcie_7x_0_rxeq_scan.v"
 set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
 set_property -name "file_type" -value "Verilog" -objects $file_obj
 
+set file "pio/EP_MEM.v"
+set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
+set_property -name "file_type" -value "Verilog" -objects $file_obj
+
+set file "pio/PIO.v"
+set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
+set_property -name "file_type" -value "Verilog" -objects $file_obj
+
+set file "pio/PIO_EP.v"
+set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
+set_property -name "file_type" -value "Verilog" -objects $file_obj
+
+set file "pio/PIO_EP_MEM_ACCESS.v"
+set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
+set_property -name "file_type" -value "Verilog" -objects $file_obj
+
+set file "pio/PIO_RX_ENGINE.v"
+set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
+set_property -name "file_type" -value "Verilog" -objects $file_obj
+
+set file "pio/PIO_TX_ENGINE.v"
+set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
+set_property -name "file_type" -value "Verilog" -objects $file_obj
+
+set file "pio/PIO_TO_CTRL.v"
+set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
+set_property -name "file_type" -value "Verilog" -objects $file_obj
 
 # Set 'sources_1' fileset properties
 set obj [get_filesets sources_1]
