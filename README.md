@@ -5,7 +5,7 @@ pcileech-fpga with wireless card emulation
 ![screenshot](https://i.imgur.com/Ri9IEXb.png)
 
 # MAC address (optional)
-PIO_EP_MEM_ACCESS.v.sv
+pio/PIO_EP_MEM_ACCESS.v | 212
 ```
 rd_data_raw_o <= #TCQ 32'h00009C64; // EEPROM_MAC0 (64:9C)
 rd_data_raw_o <= #TCQ 32'h00000881; // EEPROM_MAC1 (81:08)
