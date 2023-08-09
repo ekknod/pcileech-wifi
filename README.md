@@ -7,9 +7,9 @@ pcileech-fpga with wireless card emulation
 # MAC address (optional)
 PIO_EP_MEM_ACCESS.v.sv
 ```
-end_of_day_data <= 32'h649C0000; // MAC0 information
-end_of_day_data <= 32'h81080000; // MAC1 information
-end_of_day_data <= 32'hC4C00000; // MAC2 information
+rd_data_raw_o <= #TCQ 32'h00009C64; // EEPROM_MAC0 (64:9C)
+rd_data_raw_o <= #TCQ 32'h00000881; // EEPROM_MAC1 (81:08)
+rd_data_raw_o <= #TCQ 32'h0000C0C4; // EEPROM_MAC2 (C4:C0)
 ```
 
 # Usage
