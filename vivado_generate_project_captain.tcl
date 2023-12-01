@@ -12,7 +12,7 @@ if { [info exists ::origin_dir_loc] } {
 }
 
 # Set the project name
-set _xil_proj_name_ "pcileech_captain"
+set _xil_proj_name_ "pcileech_enigma_x1"
 
 # Use project name variable, if specified in the tcl shell
 if { [info exists ::user_project_name] } {
@@ -115,7 +115,7 @@ set files [list \
  [file normalize "${origin_dir}/src/pcileech_pcie_cfg_a7.sv"]\
  [file normalize "${origin_dir}/src/pcileech_pcie_tlp_a7.sv"]\
  [file normalize "${origin_dir}/src/pcileech_pcie_cfgspace_shadow.sv"]\
- [file normalize "${origin_dir}/src/pcileech_captain_top.sv"]\
+ [file normalize "${origin_dir}/src/pcileech_enigma_x1_top.sv"]\
  [file normalize "${origin_dir}/pcie_7x/pcie_7x_0.v"]\
  [file normalize "${origin_dir}/pcie_7x/pcie_7x_0_axi_basic_rx.v"]\
  [file normalize "${origin_dir}/pcie_7x/pcie_7x_0_axi_basic_rx_null_gen.v"]\
@@ -205,7 +205,7 @@ set file "src/pcileech_pcie_cfgspace_shadow.sv"
 set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
 set_property -name "file_type" -value "SystemVerilog" -objects $file_obj
 
-set file "src/pcileech_captain_top.sv"
+set file "src/pcileech_enigma_x1_top.sv"
 set file_obj [get_files -of_objects [get_filesets sources_1] [list "*$file"]]
 set_property -name "file_type" -value "SystemVerilog" -objects $file_obj
 
@@ -395,7 +395,7 @@ set_property -name "file_type" -value "Verilog" -objects $file_obj
 
 # Set 'sources_1' fileset properties
 set obj [get_filesets sources_1]
-set_property -name "top" -value "pcileech_captain_top" -objects $obj
+set_property -name "top" -value "pcileech_enigma_x1_top" -objects $obj
 set_property -name "top_auto_set" -value "0" -objects $obj
 
 
@@ -685,7 +685,7 @@ set obj [get_filesets sim_1]
 
 # Set 'sim_1' fileset properties
 set obj [get_filesets sim_1]
-set_property -name "top" -value "pcileech_captain_top" -objects $obj
+set_property -name "top" -value "pcileech_enigma_x1_top" -objects $obj
 set_property -name "top_auto_set" -value "0" -objects $obj
 
 # Upgrade IP from the currently installed Vivado version
