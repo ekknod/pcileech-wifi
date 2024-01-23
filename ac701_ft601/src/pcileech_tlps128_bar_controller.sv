@@ -44,6 +44,7 @@ module pcileech_tlps128_bar_controller(
     input                   clk,
     input                   bar_en,
     input [15:0]            pcie_id,
+    input [31:0]            base_address_register,
     IfAXIS128.sink_lite     tlps_in,
     IfAXIS128.source        tlps_out
 );
@@ -135,18 +136,19 @@ module pcileech_tlps128_bar_controller(
     assign rd_rsp_valid = bar_rsp_valid[0] || bar_rsp_valid[1] || bar_rsp_valid[2] || bar_rsp_valid[3] || bar_rsp_valid[4] || bar_rsp_valid[5] || bar_rsp_valid[6];
     
     pcileech_bar_impl_ar9287_wifi i_bar0(
-        .rst            ( rst                           ),
-        .clk            ( clk                           ),
-        .wr_addr        ( wr_addr                       ),
-        .wr_be          ( wr_be                         ),
-        .wr_data        ( wr_data                       ),
-        .wr_valid       ( wr_valid && wr_bar[0]         ),
-        .rd_req_ctx     ( rd_req_ctx                    ),
-        .rd_req_addr    ( rd_req_addr                   ),
-        .rd_req_valid   ( rd_req_valid && rd_req_bar[0] ),
-        .rd_rsp_ctx     ( bar_rsp_ctx[0]                ),
-        .rd_rsp_data    ( bar_rsp_data[0]               ),
-        .rd_rsp_valid   ( bar_rsp_valid[0]              )
+        .rst                   ( rst                           ),
+        .clk                   ( clk                           ),
+        .wr_addr               ( wr_addr                       ),
+        .wr_be                 ( wr_be                         ),
+        .wr_data               ( wr_data                       ),
+        .wr_valid              ( wr_valid && wr_bar[0]         ),
+        .rd_req_ctx            ( rd_req_ctx                    ),
+        .rd_req_addr           ( rd_req_addr                   ),
+        .rd_req_valid          ( rd_req_valid && rd_req_bar[0] ),
+        .base_address_register ( base_address_register         ),
+        .rd_rsp_ctx            ( bar_rsp_ctx[0]                ),
+        .rd_rsp_data           ( bar_rsp_data[0]               ),
+        .rd_rsp_valid          ( bar_rsp_valid[0]              )
     );
     
     pcileech_bar_impl_loopaddr i_bar1(
@@ -810,6 +812,7 @@ module pcileech_bar_impl_ar9287_wifi(
     input  [87:0]       rd_req_ctx,
     input  [31:0]       rd_req_addr,
     input               rd_req_valid,
+    input  [31:0]       base_address_register,
     // outgoing BAR read replies:
     output bit [87:0]   rd_rsp_ctx,
     output bit [31:0]   rd_rsp_data,
@@ -843,7 +846,7 @@ module pcileech_bar_impl_ar9287_wifi(
         dwr_data        <= wr_data;
 
         if (drd_req_valid)
-            case (drd_req_addr[15:00])
+            case ({drd_req_addr[31:24], drd_req_addr[23:16], drd_req_addr[15:08], drd_req_addr[07:00]} - base_address_register)
                 16'h2000 : begin data_32 <= 1;  rd_rsp_data <= 32'hDEADBEEF; end // EEPROM MGIC REQ
                 16'h2200 : begin data_32 <= 2;  rd_rsp_data <= 32'hDEADBEEF; end // EEPROM SIZE REQ
                 16'h2204 : begin data_32 <= 3;  rd_rsp_data <= 32'hDEADBEEF; end // EEPROM CSUM REQ
@@ -893,7 +896,7 @@ module pcileech_bar_impl_ar9287_wifi(
                 default : rd_rsp_data <= 32'hDEADBEEF;  // default value: 0xDEADBEEF
             endcase
         else if (dwr_valid)
-            case (dwr_addr[15:00])
+            case ({dwr_addr[31:24], dwr_addr[23:16], dwr_addr[15:08], dwr_addr[07:00]} - base_address_register)
                 16'h8000 : data_32 <= dwr_data;
                 16'h9820 : data_32 <= dwr_data;
             endcase

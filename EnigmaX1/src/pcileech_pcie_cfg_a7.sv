@@ -17,7 +17,8 @@ module pcileech_pcie_cfg_a7(
     IfPCIeFifoCfg.mp_pcie   dfifo,
     IfPCIeSignals.mpm       ctx,
     IfAXIS128.source        tlps_static,
-    output [15:0]           pcie_id
+    output [15:0]           pcie_id,
+    output wire [31:0]      base_address_register
     );
 
     // ----------------------------------------------------
@@ -95,12 +96,14 @@ module pcileech_pcie_cfg_a7(
     reg                 rwi_tlp_static_2nd;
     reg                 rwi_tlp_static_has_data;
     reg     [31:0]      rwi_count_cfgspace_status_cl;
+    bit     [31:0]      base_address_register_reg;
    
     // ------------------------------------------------------------------------
     // REGISTER FILE: READ-ONLY LAYOUT/SPECIFICATION
     // ------------------------------------------------------------------------
      
     // MAGIC
+    assign base_address_register = base_address_register_reg;
     assign ro[15:0]     = 16'h2301;                     // +000: MAGIC
     // SPECIAL
     assign ro[16]       = ctx.cfg_mgmt_rd_en;           // +002: SPECIAL
@@ -198,6 +201,7 @@ module pcileech_pcie_cfg_a7(
             
             rwi_cfg_mgmt_rd_en <= 1'b0;
             rwi_cfg_mgmt_wr_en <= 1'b0;
+            base_address_register_reg <= 32'h00000000;
     
             // MAGIC
             rw[15:0]    <= 16'h6745;                // +000:
@@ -374,10 +378,28 @@ module pcileech_pcie_cfg_a7(
                         rw[174]     <= 0;                                   // cfg_mgmt_byte_en: status register
                         rw[175]     <= rw[RWPOS_CFG_CFGSPACE_STATUS_CL_EN]; // cfg_mgmt_byte_en: status register
                     end
-
+                
+                if ((base_address_register_reg == 32'h00000000) | (base_address_register_reg == 32'hFFE00000))
+                    if ( ~in_cmd_read & ~in_cmd_write & ~rw[RWPOS_CFG_RD_EN] & ~rw[RWPOS_CFG_WR_EN] & ~rwi_cfg_mgmt_rd_en & ~rwi_cfg_mgmt_wr_en )
+                        begin
+                            rw[RWPOS_CFG_RD_EN] <= 1'b1;
+                            rw[169:160] <= 4;                                   // cfg_mgmt_dwaddr
+                            rw[172]     <= 0;                                   // cfg_mgmt_byte_en
+                            rw[173]     <= 0;                                   // cfg_mgmt_byte_en
+                            rw[174]     <= 0;                                   // cfg_mgmt_byte_en
+                            rw[175]     <= 0;                                   // cfg_mgmt_byte_en
+                        end
+                
                 // CONFIG SPACE READ/WRITE                        
                 if ( ctx.cfg_mgmt_rd_wr_done )
                     begin
+                        //
+                        // if BAR0 was requested, lets save it.
+                        //
+                        if ((base_address_register_reg == 32'h00000000) | (base_address_register_reg == 32'hFFE00000))
+                            if ((ctx.cfg_mgmt_dwaddr == 8'h04) & rwi_cfg_mgmt_rd_en)
+                                    base_address_register_reg <= ctx.cfg_mgmt_do;
+
                         rwi_cfg_mgmt_rd_en  <= 1'b0;
                         rwi_cfg_mgmt_wr_en  <= 1'b0;
                         rwi_cfgrd_valid     <= 1'b1;
