@@ -216,7 +216,7 @@ module pcileech_pcie_cfg_a7(
             // SIZEOF / BYTECOUNT [little-endian]
             rw[63:32]   <= $bits(rw) >> 3;          // +004: bytecount [little endian]
             // DSN
-            rw[127:64]  <= 64'h0000000101000A35;    // +008: cfg_dsn
+            rw[127:64]  <= 64'h0000000000000000;    // +008: cfg_dsn
             // PCIe CFG MGMT
             rw[159:128] <= 0;                       // +010: cfg_mgmt_di
             rw[169:160] <= 0;                       // +014: cfg_mgmt_dwaddr
