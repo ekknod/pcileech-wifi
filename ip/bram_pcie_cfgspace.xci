@@ -4,7 +4,7 @@
     "xci_name": "bram_pcie_cfgspace",
     "component_reference": "xilinx.com:ip:blk_mem_gen:8.4",
     "ip_revision": "7",
-    "gen_directory": "../../../../pcileech_squirrel.gen/sources_1/ip/bram_pcie_cfgspace",
+    "gen_directory": "../../../../pcileech_tbx4.gen/sources_1/ip/bram_pcie_cfgspace",
     "parameters": {
       "component_parameters": {
         "Component_Name": [ { "value": "bram_pcie_cfgspace", "resolve_type": "user", "usage": "all" } ],
@@ -161,7 +161,7 @@
         "ARCHITECTURE": [ { "value": "artix7" } ],
         "BASE_BOARD_PART": [ { "value": "" } ],
         "BOARD_CONNECTIONS": [ { "value": "" } ],
-        "DEVICE": [ { "value": "xc7a35t" } ],
+        "DEVICE": [ { "value": "xc7a100t" } ],
         "PACKAGE": [ { "value": "fgg484" } ],
         "PREFHDL": [ { "value": "VERILOG" } ],
         "SILICON_REVISION": [ { "value": "" } ],
@@ -176,7 +176,7 @@
         "IPCONTEXT": [ { "value": "IP_Flow" } ],
         "IPREVISION": [ { "value": "7" } ],
         "MANAGED": [ { "value": "TRUE" } ],
-        "OUTPUTDIR": [ { "value": "../../../../pcileech_squirrel.gen/sources_1/ip/bram_pcie_cfgspace" } ],
+        "OUTPUTDIR": [ { "value": "../../../../pcileech_tbx4.gen/sources_1/ip/bram_pcie_cfgspace" } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
         "SHAREDDIR": [ { "value": "." } ],
         "SWVERSION": [ { "value": "2023.2" } ],

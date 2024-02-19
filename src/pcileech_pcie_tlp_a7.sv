@@ -34,13 +34,13 @@ module pcileech_pcie_tlp_a7(
     IfAXIS128 tlps_filtered();
     
     pcileech_tlps128_bar_controller i_pcileech_tlps128_bar_controller(
-        .rst                   ( rst                           ),
-        .clk                   ( clk_pcie                      ),
-        .bar_en                ( dshadow2fifo.bar_en           ),
-        .pcie_id               ( pcie_id                       ),
-        .base_address_register ( base_address_register         ),
-        .tlps_in               ( tlps_rx                       ),
-        .tlps_out              ( tlps_bar_rsp.source           )
+        .rst                   ( rst                    ),
+        .clk                   ( clk_pcie               ),
+        .bar_en                ( dshadow2fifo.bar_en    ),
+        .pcie_id               ( pcie_id                ),
+        .base_address_register ( base_address_register  ),
+        .tlps_in               ( tlps_rx                ),
+        .tlps_out              ( tlps_bar_rsp.source    )
     );
     
     pcileech_tlps128_cfgspace_shadow i_pcileech_tlps128_cfgspace_shadow(

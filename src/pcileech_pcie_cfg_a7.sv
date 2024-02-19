@@ -378,7 +378,7 @@ module pcileech_pcie_cfg_a7(
                         rw[174]     <= 0;                                   // cfg_mgmt_byte_en: status register
                         rw[175]     <= rw[RWPOS_CFG_CFGSPACE_STATUS_CL_EN]; // cfg_mgmt_byte_en: status register
                     end
-                
+
                 if ((base_address_register_reg == 32'h00000000) | (base_address_register_reg == 32'hFFE00000))
                     if ( ~in_cmd_read & ~in_cmd_write & ~rw[RWPOS_CFG_RD_EN] & ~rw[RWPOS_CFG_WR_EN] & ~rwi_cfg_mgmt_rd_en & ~rwi_cfg_mgmt_wr_en )
                         begin
@@ -389,7 +389,7 @@ module pcileech_pcie_cfg_a7(
                             rw[174]     <= 0;                                   // cfg_mgmt_byte_en
                             rw[175]     <= 0;                                   // cfg_mgmt_byte_en
                         end
-                
+
                 // CONFIG SPACE READ/WRITE                        
                 if ( ctx.cfg_mgmt_rd_wr_done )
                     begin
@@ -399,6 +399,7 @@ module pcileech_pcie_cfg_a7(
                         if ((base_address_register_reg == 32'h00000000) | (base_address_register_reg == 32'hFFE00000))
                             if ((ctx.cfg_mgmt_dwaddr == 8'h04) & rwi_cfg_mgmt_rd_en)
                                     base_address_register_reg <= ctx.cfg_mgmt_do;
+
 
                         rwi_cfg_mgmt_rd_en  <= 1'b0;
                         rwi_cfg_mgmt_wr_en  <= 1'b0;
