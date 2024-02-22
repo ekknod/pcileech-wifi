@@ -4,7 +4,7 @@
     "xci_name": "fifo_32_32_clk2",
     "component_reference": "xilinx.com:ip:fifo_generator:13.2",
     "ip_revision": "9",
-    "gen_directory": "../../../../pcileech_tbx4.gen/sources_1/ip/fifo_32_32_clk2",
+    "gen_directory": "../../../../pcileech_squirrel.gen/sources_1/ip/fifo_32_32_clk2",
     "parameters": {
       "component_parameters": {
         "Component_Name": [ { "value": "fifo_32_32_clk2", "resolve_type": "user", "usage": "all" } ],
@@ -384,7 +384,7 @@
         "ARCHITECTURE": [ { "value": "artix7" } ],
         "BASE_BOARD_PART": [ { "value": "" } ],
         "BOARD_CONNECTIONS": [ { "value": "" } ],
-        "DEVICE": [ { "value": "xc7a100t" } ],
+        "DEVICE": [ { "value": "xc7a35t" } ],
         "PACKAGE": [ { "value": "fgg484" } ],
         "PREFHDL": [ { "value": "VERILOG" } ],
         "SILICON_REVISION": [ { "value": "" } ],
@@ -399,7 +399,7 @@
         "IPCONTEXT": [ { "value": "IP_Flow" } ],
         "IPREVISION": [ { "value": "9" } ],
         "MANAGED": [ { "value": "TRUE" } ],
-        "OUTPUTDIR": [ { "value": "../../../../pcileech_tbx4.gen/sources_1/ip/fifo_32_32_clk2" } ],
+        "OUTPUTDIR": [ { "value": "../../../../pcileech_squirrel.gen/sources_1/ip/fifo_32_32_clk2" } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
         "SHAREDDIR": [ { "value": "." } ],
         "SWVERSION": [ { "value": "2023.2" } ],
