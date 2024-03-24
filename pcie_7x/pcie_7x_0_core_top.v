@@ -74,16 +74,16 @@ module pcie_7x_0_core_top # (
 
   parameter         ALLOW_X8_GEN2 = "FALSE",
   parameter         PIPE_PIPELINE_STAGES = 1,
-  parameter [11:0]  AER_BASE_PTR = 12'h000,
+  parameter [11:0]  AER_BASE_PTR = 12'h100,
   parameter         AER_CAP_ECRC_CHECK_CAPABLE = "FALSE",
   parameter         AER_CAP_ECRC_GEN_CAPABLE = "FALSE",
   parameter         AER_CAP_MULTIHEADER = "FALSE",
-  parameter [11:0]  AER_CAP_NEXTPTR = 12'h000,
+  parameter [11:0]  AER_CAP_NEXTPTR = 12'h140,
   parameter [23:0]  AER_CAP_OPTIONAL_ERR_SUPPORT = 24'h000000,
-  parameter         AER_CAP_ON = "FALSE",
+  parameter         AER_CAP_ON = "TRUE",
   parameter         AER_CAP_PERMIT_ROOTERR_UPDATE = "FALSE",
 
-  parameter [31:0]  BAR0 = 32'hFFE00000,
+  parameter [31:0]  BAR0 = 32'hFFFE0000,
   parameter [31:0]  BAR1 = 32'h00000000,
   parameter [31:0]  BAR2 = 32'h00000000,
   parameter [31:0]  BAR3 = 32'h00000000,
@@ -95,7 +95,7 @@ module pcie_7x_0_core_top # (
   parameter [23:0]  CLASS_CODE = 24'h028000,
   parameter         CMD_INTX_IMPLEMENTED = "TRUE",
   parameter         CPL_TIMEOUT_DISABLE_SUPPORTED = "TRUE",
-  parameter [3:0]   CPL_TIMEOUT_RANGES_SUPPORTED = 4'h0,
+  parameter [3:0]   CPL_TIMEOUT_RANGES_SUPPORTED = 4'h1,
 
   parameter integer DEV_CAP_ENDPOINT_L0S_LATENCY = 3,
   parameter integer DEV_CAP_ENDPOINT_L1_LATENCY = 6,
@@ -114,8 +114,8 @@ module pcie_7x_0_core_top # (
   parameter         DISABLE_LANE_REVERSAL = "TRUE",
   parameter         DISABLE_RX_POISONED_RESP = "FALSE",
   parameter         DISABLE_SCRAMBLING = "FALSE",
-  parameter [11:0]  DSN_BASE_PTR = 12'h100,
-  parameter [11:0]  DSN_CAP_NEXTPTR = 12'h140,
+  parameter [11:0]  DSN_BASE_PTR = 12'h160,
+  parameter [11:0]  DSN_CAP_NEXTPTR = 12'h170,
   parameter         DSN_CAP_ON = "TRUE",
 
   parameter [10:0]  ENABLE_MSG_ROUTE = 11'b00000000000,
@@ -159,7 +159,7 @@ module pcie_7x_0_core_top # (
   parameter [28:0]  MSIX_CAP_TABLE_OFFSET = 29'h0,
   parameter [10:0]  MSIX_CAP_TABLE_SIZE = 11'h000,
 
-  parameter [3:0]   PCIE_CAP_DEVICE_PORT_TYPE = 4'h0,
+  parameter [3:0]   PCIE_CAP_DEVICE_PORT_TYPE = 4'h1,
   parameter [7:0]   PCIE_CAP_NEXTPTR = 8'h00,
 
   parameter         PM_CAP_DSI = "FALSE",
@@ -232,9 +232,9 @@ module pcie_7x_0_core_top # (
   parameter         USER_CLK_FREQ = 1,
   parameter         USER_CLK2_DIV2 = "FALSE",
 
-  parameter [11:0]  VC_BASE_PTR = 12'h000,
-  parameter [11:0]  VC_CAP_NEXTPTR = 12'h000,
-  parameter         VC_CAP_ON = "FALSE",
+  parameter [11:0]  VC_BASE_PTR = 12'h140,
+  parameter [11:0]  VC_CAP_NEXTPTR = 12'h160,
+  parameter         VC_CAP_ON = "TRUE",
   parameter         VC_CAP_REJECT_SNOOP_TRANSACTIONS = "FALSE",
 
   parameter         VC0_CPL_INFINITE = "TRUE",
@@ -247,9 +247,9 @@ module pcie_7x_0_core_top # (
   parameter         VC0_TOTAL_CREDITS_PH = 4,
   parameter         VC0_TX_LASTPACKET = 29,
 
-  parameter [11:0]  VSEC_BASE_PTR = 12'h000,
+  parameter [11:0]  VSEC_BASE_PTR = 12'h170,
   parameter [11:0]  VSEC_CAP_NEXTPTR = 12'h000,
-  parameter         VSEC_CAP_ON = "FALSE",
+  parameter         VSEC_CAP_ON = "TRUE",
 
   parameter         DISABLE_ASPM_L1_TIMER = "FALSE",
   parameter         DISABLE_BAR_FILTERING = "FALSE",
@@ -257,7 +257,7 @@ module pcie_7x_0_core_top # (
   parameter         DISABLE_RX_TC_FILTER = "FALSE",
   parameter [7:0]   DNSTREAM_LINK_NUM = 8'h00,
 
-  parameter [15:0]  DSN_CAP_ID = 16'h0001,
+  parameter [15:0]  DSN_CAP_ID = 16'h0003,
   parameter [3:0]   DSN_CAP_VERSION = 4'h1,
   parameter         ENTER_RVRY_EI_L0 = "TRUE",
   parameter [4:0]   INFER_EI = 5'h00,
@@ -357,8 +357,8 @@ module pcie_7x_0_core_top # (
   parameter         CFG_ECRC_ERR_CPLSTAT = 0,
   parameter [7:0]   CAPABILITIES_PTR = 8'h40,
   parameter [6:0]   CRM_MODULE_RSTS = 7'h00,
-  parameter         DEV_CAP_ENABLE_SLOT_PWR_LIMIT_SCALE = "TRUE",
-  parameter         DEV_CAP_ENABLE_SLOT_PWR_LIMIT_VALUE = "TRUE",
+  parameter         DEV_CAP_ENABLE_SLOT_PWR_LIMIT_SCALE = "FALSE",
+  parameter         DEV_CAP_ENABLE_SLOT_PWR_LIMIT_VALUE = "FALSE",
   parameter         DEV_CAP_FUNCTION_LEVEL_RESET_CAPABLE = "FALSE",
   parameter         DEV_CAP_ROLE_BASED_ERROR = "TRUE",
   parameter         DEV_CAP_RSVD_14_12 = 0,
@@ -368,10 +368,10 @@ module pcie_7x_0_core_top # (
 
   parameter [15:0]  VC_CAP_ID = 16'h0002,
   parameter [3:0]   VC_CAP_VERSION = 4'h1,
-  parameter [15:0]  VSEC_CAP_HDR_ID = 16'h1234,
-  parameter [11:0]  VSEC_CAP_HDR_LENGTH = 12'h018,
-  parameter [3:0]   VSEC_CAP_HDR_REVISION = 4'h1,
-  parameter [15:0]  VSEC_CAP_ID = 16'h000B,
+  parameter [15:0]  VSEC_CAP_HDR_ID = 16'h0000,
+  parameter [11:0]  VSEC_CAP_HDR_LENGTH = 12'h000,
+  parameter [3:0]   VSEC_CAP_HDR_REVISION = 4'h0,
+  parameter [15:0]  VSEC_CAP_ID = 16'h0004,
   parameter         VSEC_CAP_IS_LINK_VISIBLE = "TRUE",
   parameter [3:0]   VSEC_CAP_VERSION = 4'h1,
 
