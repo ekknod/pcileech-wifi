@@ -70,6 +70,8 @@ CFG_DEV_ID list
 0x002C
 0x002B
 0x002A
+
+full list: https://github.com/torvalds/linux/blob/master/drivers/net/wireless/ath/ath9k/pci.c#L24
 */
   parameter         CFG_VEND_ID        = 16'h168C,
   parameter         CFG_DEV_ID         = 16'h002B,
